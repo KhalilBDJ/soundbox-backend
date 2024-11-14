@@ -9,6 +9,7 @@ import java.util.List;
 @Entity
 @Getter
 @Setter
+@Table(name = "app_user")  // Change le nom de la table pour éviter le conflit avec le mot réservé "user"
 public class User {
 
     @Id
