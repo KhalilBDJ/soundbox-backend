@@ -4,6 +4,7 @@ import com.bedjaoui.backend.Model.Sound;
 import com.bedjaoui.backend.Model.User;
 import com.bedjaoui.backend.Repository.SoundRepository;
 import com.bedjaoui.backend.Repository.UserRepository;
+import com.bedjaoui.backend.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,28 +18,22 @@ import java.util.Optional;
 @RequestMapping("user")
 public class UserController {
 
-    private final SoundRepository soundRepository;
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder; // Injection du PasswordEncoder
+    private final UserService userService;
 
-
-    public UserController(SoundRepository soundRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.soundRepository = soundRepository;
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
     @GetMapping
     public ResponseEntity<List<User>> getUsers(){
-        List<User> users = userRepository.findAll();
+        List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<User> getUser(@PathVariable Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
+        User user = userService.getUserById(id);
         return ResponseEntity.ok(user);
     }
 
@@ -58,6 +53,4 @@ public class UserController {
         User savedUser = userRepository.save(user);
         return ResponseEntity.ok(savedUser);
     }
-
-
 }
