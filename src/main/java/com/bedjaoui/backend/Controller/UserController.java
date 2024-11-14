@@ -4,8 +4,12 @@ import com.bedjaoui.backend.Model.Sound;
 import com.bedjaoui.backend.Model.User;
 import com.bedjaoui.backend.Repository.SoundRepository;
 import com.bedjaoui.backend.Repository.UserRepository;
+import com.bedjaoui.backend.Service.AuthService;
+import com.bedjaoui.backend.Service.SoundService;
 import com.bedjaoui.backend.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.expression.ExpressionException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -15,42 +19,74 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("user")
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
+    private final SoundService soundService;
+    private final AuthService authService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, SoundService soundService, AuthService authService) {
         this.userService = userService;
+        this.soundService = soundService;
+        this.authService = authService;
     }
 
+    // Création d'un nouvel utilisateur
+    @PostMapping
+    public ResponseEntity<User> addUser(@RequestBody User user) {
+        if (userService.checkIfUserExists(user.getEmail())) {
+            return ResponseEntity.badRequest().build(); // Utilisateur existe déjà
+        }
+        User savedUser = userService.addUser(user);
+        return ResponseEntity.ok(savedUser);
+    }
+
+    // Récupérer tous les utilisateurs
     @GetMapping
-    public ResponseEntity<List<User>> getUsers(){
+    public ResponseEntity<List<User>> getAllUsers() {
         List<User> users = userService.getAllUsers();
         return ResponseEntity.ok(users);
     }
 
+    // Récupérer un utilisateur par ID
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable Long id) {
-        User user = userService.getUserById(id);
-        return ResponseEntity.ok(user);
-    }
-
-    @GetMapping("/{userId}/sounds")
-    public ResponseEntity<List<Sound>> getUserSounds(@PathVariable Long userId) {
-        if (!userRepository.existsById(userId)) {
+    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+        Optional<User> user = userService.getUserById(id);
+        if (user.isPresent()) {
+            return ResponseEntity.ok(user.get());
+        } else {
             return ResponseEntity.notFound().build();
         }
-        List<Sound> sounds = soundRepository.findByUserId(userId);
+    }
+
+    // Récupérer un utilisateur par email
+    @GetMapping("/email/{email}")
+    public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
+        Optional<User> user = userService.getUserByEmail(email);
+        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
+    // Récupérer tous les sons d'un utilisateur
+    @GetMapping("/{userId}/sounds")
+    public ResponseEntity<List<Sound>> getUserSounds(@PathVariable Long userId) {
+        if (!userService.checkIfUserExists(userId)) {
+            return ResponseEntity.notFound().build();
+        }
+        List<Sound> sounds = soundService.getSoundsByUserId(userId).orElseThrow(() -> new IllegalArgumentException("No user found or list of sound is empty"));
         return ResponseEntity.ok(sounds);
     }
 
-    @PostMapping
-    public ResponseEntity<User> addUser(@RequestBody User user) {
-        // Hachage du mot de passe avant de le sauvegarder en base
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        User savedUser = userRepository.save(user);
-        return ResponseEntity.ok(savedUser);
+    // Authentification de l'utilisateur et génération de token
+    @PostMapping("/login")
+    public ResponseEntity<String> authenticateUser(@RequestBody User user) {
+        try {
+            String token = authService.authenticate(user.getEmail(), user.getPassword());
+            return ResponseEntity.ok(token);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(401).body("Invalid credentials");
+        }
     }
 }
+

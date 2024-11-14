@@ -15,49 +15,51 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final SoundService soundService;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, SoundService soundService) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.soundService = soundService;
     }
 
-
+    // Ajouter un nouvel utilisateur avec un mot de passe haché
     public User addUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return userRepository.save(user);
     }
 
+    // Récupérer tous les utilisateurs
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }
 
-    public User getUserById(Long id) {
-        return userRepository.findById(id).orElse(null);
+    // Récupérer un utilisateur par ID
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
     }
 
-
+    // Récupérer un utilisateur par email
     public Optional<User> getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-
-    public List<Sound> getAllSounds(Long userId) {
-        return soundService.getSoundsByUserId(userId);
-    }
-
+    // Vérifier si un utilisateur existe par email
     public boolean checkIfUserExists(String email) {
-        return userRepository.findByEmail(email) != null;
+        return userRepository.findByEmail(email).isPresent();
     }
 
+    // Vérifier si un utilisateur existe par ID
     public boolean checkIfUserExists(Long userId) {
         return userRepository.findById(userId).isPresent();
     }
 
+    // Vérifier si un utilisateur existe par email et mot de passe
     public boolean checkIfUserExists(String email, String password) {
-        return userRepository.findByEmailAndPassword(email, password) != null;
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isPresent()) {
+            User user = userOptional.get();
+            return passwordEncoder.matches(password, user.getPassword());
+        }
+        return false;
     }
 }
-
