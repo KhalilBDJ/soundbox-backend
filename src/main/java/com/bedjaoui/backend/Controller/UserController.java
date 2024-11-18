@@ -24,13 +24,11 @@ public class UserController {
 
     private final UserService userService;
     private final SoundService soundService;
-    private final AuthService authService;
 
     @Autowired
-    public UserController(UserService userService, SoundService soundService, AuthService authService) {
+    public UserController(UserService userService, SoundService soundService) {
         this.userService = userService;
         this.soundService = soundService;
-        this.authService = authService;
     }
 
     // Création d'un nouvel utilisateur
@@ -76,17 +74,6 @@ public class UserController {
         }
         List<Sound> sounds = soundService.getSoundsByUserId(userId).orElseThrow(() -> new IllegalArgumentException("No user found or list of sound is empty"));
         return ResponseEntity.ok(sounds);
-    }
-
-    // Authentification de l'utilisateur et génération de token
-    @PostMapping("/login")
-    public ResponseEntity<String> authenticateUser(@RequestBody User user) {
-        try {
-            String token = authService.authenticate(user.getEmail(), user.getPassword());
-            return ResponseEntity.ok(token);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(401).body("Invalid credentials");
-        }
     }
 }
 

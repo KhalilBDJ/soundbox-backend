@@ -3,7 +3,7 @@ package com.bedjaoui.backend.Model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
+//TODO : Mettre un DTO pour retirer l'utilisateur en retour d'appel de l'API
 @Entity
 @Getter
 @Setter

@@ -34,16 +34,6 @@ public class SoundController {
         return ResponseEntity.ok(savedSound);
     }
 
-    // Récupérer tous les sons d'un utilisateur
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Sound>> getUserSounds(@PathVariable Long userId) {
-        if (!userService.checkIfUserExists(userId)) {
-            return ResponseEntity.notFound().build(); // Utilisateur non trouvé
-        }
-        List<Sound> sounds = soundService.getSoundsByUserId(userId).orElseThrow(() -> new RuntimeException("User not found"));
-        return ResponseEntity.ok(sounds);
-    }
-
     // Récupérer un son par ID
     @GetMapping("/{soundId}")
     public ResponseEntity<Sound> getSoundById(@PathVariable Long soundId) {
