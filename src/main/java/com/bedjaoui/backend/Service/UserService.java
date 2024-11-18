@@ -1,5 +1,6 @@
 package com.bedjaoui.backend.Service;
 
+import com.bedjaoui.backend.DTO.UserDTO;
 import com.bedjaoui.backend.Model.Sound;
 import com.bedjaoui.backend.Model.User;
 import com.bedjaoui.backend.Repository.UserRepository;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class UserService {
@@ -23,24 +25,29 @@ public class UserService {
     }
 
     // Ajouter un nouvel utilisateur avec un mot de passe haché
-    public User addUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+    public UserDTO addUser(UserDTO userDTO) {
+        User user = new User();
+        user.setEmail(userDTO.getEmail());
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+        User savedUser = userRepository.save(user);
+        return new UserDTO(savedUser.getId(), savedUser.getEmail(), null);
     }
 
     // Récupérer tous les utilisateurs
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(user -> new UserDTO(user.getId(), user.getEmail(), null))
+                .collect(Collectors.toList());
     }
 
     // Récupérer un utilisateur par ID
-    public Optional<User> getUserById(Long id) {
-        return userRepository.findById(id);
+    public Optional<UserDTO> getUserById(Long id) {
+        return userRepository.findById(id).map(user -> new UserDTO(user.getId(), user.getEmail(), null));
     }
 
     // Récupérer un utilisateur par email
-    public Optional<User> getUserByEmail(String email) {
-        return userRepository.findByEmail(email);
+    public Optional<UserDTO> getUserByEmail(String email) {
+        return userRepository.findByEmail(email).map(user -> new UserDTO(user.getId(), user.getEmail(), null));
     }
 
     // Vérifier si un utilisateur existe par email

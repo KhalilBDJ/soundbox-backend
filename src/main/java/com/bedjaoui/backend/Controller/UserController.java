@@ -1,5 +1,6 @@
 package com.bedjaoui.backend.Controller;
 
+import com.bedjaoui.backend.DTO.UserDTO;
 import com.bedjaoui.backend.Model.Sound;
 import com.bedjaoui.backend.Model.User;
 import com.bedjaoui.backend.Repository.SoundRepository;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
-
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -32,38 +32,34 @@ public class UserController {
     }
 
     // Création d'un nouvel utilisateur
-    @PostMapping
-    public ResponseEntity<User> addUser(@RequestBody User user) {
-        if (userService.checkIfUserExists(user.getEmail())) {
+    @PostMapping("/register")
+    public ResponseEntity<UserDTO> addUser(@RequestBody UserDTO userDTO) {
+        if (userService.checkIfUserExists(userDTO.getEmail())) {
             return ResponseEntity.badRequest().build(); // Utilisateur existe déjà
         }
-        User savedUser = userService.addUser(user);
-        return ResponseEntity.ok(savedUser);
+        UserDTO savedUserDTO = userService.addUser(userDTO);
+        return ResponseEntity.ok(savedUserDTO);
     }
 
     // Récupérer tous les utilisateurs
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userService.getAllUsers();
-        return ResponseEntity.ok(users);
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<UserDTO> userDTOs = userService.getAllUsers();
+        return ResponseEntity.ok(userDTOs);
     }
 
     // Récupérer un utilisateur par ID
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
-        Optional<User> user = userService.getUserById(id);
-        if (user.isPresent()) {
-            return ResponseEntity.ok(user.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+        Optional<UserDTO> userDTO = userService.getUserById(id);
+        return userDTO.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // Récupérer un utilisateur par email
     @GetMapping("/email/{email}")
-    public ResponseEntity<User> getUserByEmail(@PathVariable String email) {
-        Optional<User> user = userService.getUserByEmail(email);
-        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<UserDTO> getUserByEmail(@PathVariable String email) {
+        Optional<UserDTO> userDTO = userService.getUserByEmail(email);
+        return userDTO.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // Récupérer tous les sons d'un utilisateur

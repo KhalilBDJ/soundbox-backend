@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
-//TODO : Faire un DTO pour ne recevoir que le JWT Token
 @Entity
 @Getter
 @Setter
@@ -28,6 +27,7 @@ public class User {
         this.email = email;
         this.password = password;
     }
+
 
     public User() {
 
