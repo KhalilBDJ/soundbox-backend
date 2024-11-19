@@ -33,12 +33,12 @@ public class UserController {
 
     // Création d'un nouvel utilisateur
     @PostMapping("/register")
-    public ResponseEntity<UserDTO> addUser(@RequestBody UserDTO userDTO) {
-        if (userService.checkIfUserExists(userDTO.getEmail())) {
-            return ResponseEntity.badRequest().build(); // Utilisateur existe déjà
+    public ResponseEntity<User> addUser(@RequestBody User user) {
+        if (userService.checkIfUserExists(user.getEmail())) {
+            return ResponseEntity.badRequest().build();
         }
-        UserDTO savedUserDTO = userService.addUser(userDTO);
-        return ResponseEntity.ok(savedUserDTO);
+        User savedUser = userService.addUser(user);
+        return ResponseEntity.ok(savedUser);
     }
 
     // Récupérer tous les utilisateurs
@@ -52,13 +52,6 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
         Optional<UserDTO> userDTO = userService.getUserById(id);
-        return userDTO.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    // Récupérer un utilisateur par email
-    @GetMapping("/email/{email}")
-    public ResponseEntity<UserDTO> getUserByEmail(@PathVariable String email) {
-        Optional<UserDTO> userDTO = userService.getUserByEmail(email);
         return userDTO.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 

@@ -1,10 +1,13 @@
 package com.bedjaoui.backend.DTO;
 
+import com.bedjaoui.backend.Model.Sound;
 import com.bedjaoui.backend.Model.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -14,6 +17,5 @@ public class UserDTO {
 
     private Long id;
     private String email;
-    private String password;  // Ajout du mot de passe pour l'inscription et le login
-
+    private List<Sound> sounds;
 }

@@ -25,12 +25,10 @@ public class UserService {
     }
 
     // Ajouter un nouvel utilisateur avec un mot de passe haché
-    public UserDTO addUser(UserDTO userDTO) {
-        User user = new User();
-        user.setEmail(userDTO.getEmail());
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        User savedUser = userRepository.save(user);
-        return new UserDTO(savedUser.getId(), savedUser.getEmail(), null);
+    public User addUser(User user) {
+        user.setEmail(user.getEmail());
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        return userRepository.save(user);
     }
 
     // Récupérer tous les utilisateurs
@@ -46,8 +44,8 @@ public class UserService {
     }
 
     // Récupérer un utilisateur par email
-    public Optional<UserDTO> getUserByEmail(String email) {
-        return userRepository.findByEmail(email).map(user -> new UserDTO(user.getId(), user.getEmail(), null));
+    public Optional<User> getUserByEmail(String email) {
+        return userRepository.findByEmail(email);
     }
 
     // Vérifier si un utilisateur existe par email
