@@ -1,5 +1,6 @@
 package com.bedjaoui.backend.Model;
 
+import com.bedjaoui.backend.Model.User.User;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

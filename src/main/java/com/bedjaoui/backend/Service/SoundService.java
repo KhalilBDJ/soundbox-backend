@@ -1,7 +1,7 @@
 package com.bedjaoui.backend.Service;
 
 import com.bedjaoui.backend.Model.Sound;
-import com.bedjaoui.backend.Model.User;
+import com.bedjaoui.backend.Model.User.User;
 import com.bedjaoui.backend.Repository.SoundRepository;
 import com.bedjaoui.backend.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

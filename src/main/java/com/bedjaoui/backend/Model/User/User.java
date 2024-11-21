@@ -1,15 +1,19 @@
-package com.bedjaoui.backend.Model;
+package com.bedjaoui.backend.Model.User;
 
+import com.bedjaoui.backend.Model.User.Role;
+import com.bedjaoui.backend.Model.Sound;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+
 @Entity
 @Getter
 @Setter
-@Table(name = "app_user")  // Change le nom de la table pour éviter le conflit avec le mot réservé "user"
+@Table(name = "app_user")
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -20,6 +24,10 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Role role; // Enum pour le rôle
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Sound> sounds;
 
@@ -28,8 +36,6 @@ public class User {
         this.password = password;
     }
 
-
     public User() {
-
     }
 }

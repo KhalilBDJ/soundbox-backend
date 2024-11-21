@@ -1,7 +1,6 @@
 package com.bedjaoui.backend.DTO;
 
 import com.bedjaoui.backend.Model.Sound;
-import com.bedjaoui.backend.Model.User;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -1,5 +1,6 @@
 package com.bedjaoui.backend.Config;
 
+import com.bedjaoui.backend.Filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -11,28 +12,34 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
 //TODO implémenter une sécurité très basique, laisser l'accés à tout le monde
+//TODO : créer un token JWT permettant de reconnaitre un utilisateur avec un role user. Peut-être créer un rôle admin qui permet d'accéder à
+// la page d'ajout des sons fixes, lorsqu'un utilisateur veut se connecter, on  regarder son JWT token et prendre son usernamee, ID et
+// la liste de ses sons
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
         http
-                .csrf(AbstractHttpConfigurer::disable) // Désactiver la protection CSRF
+                .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/login", "/users/register", "/auth/**").permitAll() // Autoriser l'inscription et la connexion sans authentification
-                        .anyRequest().permitAll() // Autoriser toutes les autres requêtes sans authentification
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .anyRequest().hasRole("USER")
                 )
-                .httpBasic(withDefaults()) // Utilisation de l'authentification HTTP basique
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)); // Gestion des sessions stateless pour les API REST
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();
     }
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {

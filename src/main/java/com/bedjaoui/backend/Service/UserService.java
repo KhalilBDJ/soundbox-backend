@@ -1,8 +1,8 @@
 package com.bedjaoui.backend.Service;
 
 import com.bedjaoui.backend.DTO.UserDTO;
-import com.bedjaoui.backend.Model.Sound;
-import com.bedjaoui.backend.Model.User;
+import com.bedjaoui.backend.Model.User.Role;
+import com.bedjaoui.backend.Model.User.User;
 import com.bedjaoui.backend.Repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,6 +28,7 @@ public class UserService {
     public User addUser(User user) {
         user.setEmail(user.getEmail());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(Role.USER);
         return userRepository.save(user);
     }
 
@@ -44,27 +45,18 @@ public class UserService {
     }
 
     // Récupérer un utilisateur par email
-    public Optional<User> getUserByEmail(String email) {
+    public User getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
     // Vérifier si un utilisateur existe par email
     public boolean checkIfUserExists(String email) {
-        return userRepository.findByEmail(email).isPresent();
+        return userRepository.findByEmail(email)!=
+                null;
     }
 
     // Vérifier si un utilisateur existe par ID
     public boolean checkIfUserExists(Long userId) {
         return userRepository.findById(userId).isPresent();
-    }
-
-    // Vérifier si un utilisateur existe par email et mot de passe
-    public boolean checkIfUserExists(String email, String password) {
-        Optional<User> userOptional = userRepository.findByEmail(email);
-        if (userOptional.isPresent()) {
-            User user = userOptional.get();
-            return passwordEncoder.matches(password, user.getPassword());
-        }
-        return false;
     }
 }
