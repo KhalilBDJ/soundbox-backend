@@ -1,10 +1,12 @@
 package com.bedjaoui.backend.Security;
 
+import lombok.Getter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
 
+@Getter
 public class JwtAuthenticationToken extends AbstractAuthenticationToken {
 
     private final String username;
@@ -36,4 +38,5 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
     public Object getPrincipal() {
         return username; // Le nom d'utilisateur est considéré comme le principal
     }
+
 }
