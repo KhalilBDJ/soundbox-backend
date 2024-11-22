@@ -48,14 +48,6 @@ public class UserController {
         return userDTO.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Récupérer tous les sons d'un utilisateur
-    @GetMapping("/{userId}/sounds")
-    public ResponseEntity<List<Sound>> getUserSounds(@PathVariable Long userId) {
-        if (!userService.checkIfUserExists(userId)) {
-            return ResponseEntity.notFound().build();
-        }
-        List<Sound> sounds = soundService.getSoundsByUserId(userId).orElseThrow(() -> new IllegalArgumentException("No user found or list of sound is empty"));
-        return ResponseEntity.ok(sounds);
-    }
+
 }
 

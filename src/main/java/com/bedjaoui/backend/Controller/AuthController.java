@@ -1,7 +1,7 @@
 package com.bedjaoui.backend.Controller;
 
-import com.bedjaoui.backend.DTO.LoginRequestDTO;
-import com.bedjaoui.backend.DTO.LoginResponseDTO;
+import com.bedjaoui.backend.DTO.Login.LoginRequestDTO;
+import com.bedjaoui.backend.DTO.Login.LoginResponseDTO;
 import com.bedjaoui.backend.DTO.RegisterRequestDTO;
 import com.bedjaoui.backend.Model.User.User;
 import com.bedjaoui.backend.Service.UserService;

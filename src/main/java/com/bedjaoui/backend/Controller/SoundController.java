@@ -38,11 +38,7 @@ public class SoundController {
     @GetMapping("/{soundId}")
     public ResponseEntity<Sound> getSoundById(@PathVariable Long soundId) {
         Optional<Sound> sound = soundService.getSoundById(soundId);
-        if (sound.isPresent()) {
-            return ResponseEntity.ok(sound.get());
-        } else {
-            return ResponseEntity.notFound().build();
-        }
+        return sound.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // Supprimer un son par ID
@@ -53,5 +49,15 @@ public class SoundController {
         }
         soundService.deleteSoundById(soundId);
         return ResponseEntity.noContent().build();
+    }
+
+    // Récupérer tous les sons d'un utilisateur
+    @GetMapping("/user/{userId}/")
+    public ResponseEntity<List<Sound>> getUserSounds(@PathVariable Long userId) {
+        if (!userService.checkIfUserExists(userId)) {
+            return ResponseEntity.notFound().build();
+        }
+        List<Sound> sounds = soundService.getSoundsByUserId(userId).orElseThrow(() -> new IllegalArgumentException("No user found or list of sound is empty"));
+        return ResponseEntity.ok(sounds);
     }
 }

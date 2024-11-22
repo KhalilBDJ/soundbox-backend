@@ -1,4 +1,4 @@
-package com.bedjaoui.backend.DTO;
+package com.bedjaoui.backend.DTO.Login;
 
 
 import lombok.AllArgsConstructor;
@@ -8,8 +8,9 @@ import lombok.Setter;
 @Getter
 @Setter
 @AllArgsConstructor
-public class LoginRequestDTO {
+public class LoginResponseDTO {
+    private Long userId;
     private String email;
-    private String password;
+    private String jwtToken;
 
 }

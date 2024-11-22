@@ -36,12 +36,4 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
     public Object getPrincipal() {
         return username; // Le nom d'utilisateur est considéré comme le principal
     }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public String getRole() {
-        return role;
-    }
 }
