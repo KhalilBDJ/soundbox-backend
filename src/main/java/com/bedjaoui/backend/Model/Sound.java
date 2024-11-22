@@ -1,6 +1,7 @@
 package com.bedjaoui.backend.Model;
 
 import com.bedjaoui.backend.Model.User.User;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -19,6 +20,7 @@ public class Sound {
     private User user;
 
     @Lob
+    @Basic(fetch = FetchType.EAGER)
     private byte[] data;
 
     @Column(nullable = false)

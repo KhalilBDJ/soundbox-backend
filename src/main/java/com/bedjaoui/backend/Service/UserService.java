@@ -4,6 +4,7 @@ import com.bedjaoui.backend.DTO.UserDTO;
 import com.bedjaoui.backend.Model.User.Role;
 import com.bedjaoui.backend.Model.User.User;
 import com.bedjaoui.backend.Repository.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -17,11 +18,13 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final SoundService soundService;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, SoundService soundService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.soundService = soundService;
     }
 
     // Ajouter un nouvel utilisateur avec un mot de passe haché
@@ -33,15 +36,11 @@ public class UserService {
     }
 
     // Récupérer tous les utilisateurs
+    @Transactional
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(user -> new UserDTO(user.getId(), user.getEmail(), null))
+                .map(user -> new UserDTO(user.getId(), user.getEmail(), soundService.getSoundsByUserId(user.getId())))
                 .collect(Collectors.toList());
-    }
-
-    // Récupérer un utilisateur par ID
-    public Optional<UserDTO> getUserById(Long id) {
-        return userRepository.findById(id).map(user -> new UserDTO(user.getId(), user.getEmail(), null));
     }
 
     // Récupérer un utilisateur par email

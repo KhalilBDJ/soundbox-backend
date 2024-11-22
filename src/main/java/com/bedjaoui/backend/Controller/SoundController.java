@@ -1,13 +1,17 @@
 package com.bedjaoui.backend.Controller;
 
 
+import com.bedjaoui.backend.DTO.SoundDTO;
 import com.bedjaoui.backend.Model.Sound;
 import com.bedjaoui.backend.Service.SoundService;
 import com.bedjaoui.backend.Service.UserService;
 import com.bedjaoui.backend.Util.AuthUtils;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,27 +33,28 @@ public class SoundController {
 
     // Ajouter un nouveau son pour un utilisateur
     @PostMapping("/user/")
-    public ResponseEntity<Sound> addSoundToUser(@RequestBody Sound sound) {
-        try{
+    public ResponseEntity<String> uploadSoundToUser(@RequestParam("file") MultipartFile file,
+                                                      @RequestParam("name") String name,
+                                                      @RequestParam("duration") int duration) {
+        try {
             Long userId = authUtils.getAuthenticatedUserId();
             if (!userService.checkIfUserExists(userId)) {
                 return ResponseEntity.notFound().build(); // Utilisateur non trouvé
             }
-            Sound savedSound = soundService.addSoundToUser(userId, sound);
-            return ResponseEntity.ok(savedSound);
+            soundService.addSoundToUser(userId, file, name, duration);
+            return ResponseEntity.ok("Sound added successfully + " + name);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(null); // Utilisateur non trouvé
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(500).body(null); // Erreur de traitement du fichier
         }
-        catch (IllegalStateException e) {
-            return ResponseEntity.status(401).build();
-        }
-
-
     }
 
     // Récupérer un son par ID
     @GetMapping("/{soundId}")
-    public ResponseEntity<Sound> getSoundById(@PathVariable Long soundId) {
-        Optional<Sound> sound = soundService.getSoundById(soundId);
-        return sound.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    public ResponseEntity<SoundDTO> getSoundById(@PathVariable Long soundId) {
+        SoundDTO soundDTO = soundService.getSoundById(soundId);
+        return ResponseEntity.ok(soundDTO);
     }
 
     // Supprimer un son par ID
@@ -61,14 +66,31 @@ public class SoundController {
         soundService.deleteSoundById(soundId);
         return ResponseEntity.noContent().build();
     }
+    @GetMapping("/{soundId}/data")
+    public ResponseEntity<Resource> getSoundData(@PathVariable Long soundId) {
+        try {
+            // Déléguer la récupération des données au service
+            byte[] soundData = soundService.getSoundData(soundId);
+
+            // Créer une ressource pour le téléchargement
+            ByteArrayResource resource = new ByteArrayResource(soundData);
+
+            return ResponseEntity.ok()
+                    .header("Content-Disposition", "attachment; filename=\"sound_" + soundId + ".mp3\"")
+                    .contentLength(soundData.length)
+                    .contentType(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM)
+                    .body((Resource) resource);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build(); // Son non trouvé
+        }
+    }
+
 
     @GetMapping("/user/me")
-    public ResponseEntity<List<Sound>> getAuthenticatedUserSounds() {
+    public ResponseEntity<List<SoundDTO>> getAuthenticatedUserSounds() {
         try {
             Long userId = authUtils.getAuthenticatedUserId();
-            List<Sound> sounds = soundService.getSoundsByUserId(userId).orElseThrow(
-                    () -> new IllegalArgumentException("No sounds found for this user.")
-            );
+            List<SoundDTO> sounds = soundService.getSoundsByUserId(userId);
             return ResponseEntity.ok(sounds);
         } catch (IllegalStateException e) {
             return ResponseEntity.status(401).build();

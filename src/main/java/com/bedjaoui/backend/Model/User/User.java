@@ -2,6 +2,7 @@ package com.bedjaoui.backend.Model.User;
 
 import com.bedjaoui.backend.Model.User.Role;
 import com.bedjaoui.backend.Model.Sound;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

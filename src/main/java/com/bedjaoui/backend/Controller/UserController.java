@@ -41,13 +41,5 @@ public class UserController {
         return ResponseEntity.ok(userDTOs);
     }
 
-    // Récupérer un utilisateur par ID
-    @GetMapping("/{id}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
-        Optional<UserDTO> userDTO = userService.getUserById(id);
-        return userDTO.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-
 }
 
