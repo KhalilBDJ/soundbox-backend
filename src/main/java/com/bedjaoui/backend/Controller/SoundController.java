@@ -6,7 +6,6 @@ import com.bedjaoui.backend.Model.Sound;
 import com.bedjaoui.backend.Service.SoundService;
 import com.bedjaoui.backend.Service.UserService;
 import com.bedjaoui.backend.Util.AuthUtils;
-import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
@@ -67,9 +66,9 @@ public class SoundController {
         return ResponseEntity.noContent().build();
     }
     @GetMapping("/{soundId}/data")
-    public ResponseEntity<Resource> getSoundData(@PathVariable Long soundId) {
+    public ResponseEntity<org.springframework.core.io.Resource> getSoundData(@PathVariable Long soundId) {
         try {
-            // Déléguer la récupération des données au service
+            // Récupérer les données du son
             byte[] soundData = soundService.getSoundData(soundId);
 
             // Créer une ressource pour le téléchargement
@@ -79,11 +78,14 @@ public class SoundController {
                     .header("Content-Disposition", "attachment; filename=\"sound_" + soundId + ".mp3\"")
                     .contentLength(soundData.length)
                     .contentType(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM)
-                    .body((Resource) resource);
+                    .body(resource);
         } catch (RuntimeException e) {
             return ResponseEntity.notFound().build(); // Son non trouvé
         }
     }
+
+
+
 
 
     @GetMapping("/user/me")
