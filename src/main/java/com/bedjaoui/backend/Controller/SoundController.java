@@ -2,7 +2,6 @@ package com.bedjaoui.backend.Controller;
 
 
 import com.bedjaoui.backend.DTO.SoundDTO;
-import com.bedjaoui.backend.Model.Sound;
 import com.bedjaoui.backend.Service.SoundService;
 import com.bedjaoui.backend.Service.UserService;
 import com.bedjaoui.backend.Util.AuthUtils;
@@ -11,9 +10,9 @@ import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.core.io.Resource;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/sounds")
@@ -56,17 +55,16 @@ public class SoundController {
         return ResponseEntity.ok(soundDTO);
     }
 
-    // Supprimer un son par ID
     @DeleteMapping("/{soundId}")
     public ResponseEntity<Void> deleteSoundById(@PathVariable Long soundId) {
         if (!soundService.checkIfSoundExists(soundId)) {
-            return ResponseEntity.notFound().build(); // Son non trouvé
+            return ResponseEntity.notFound().build();
         }
         soundService.deleteSoundById(soundId);
         return ResponseEntity.noContent().build();
     }
     @GetMapping("/{soundId}/data")
-    public ResponseEntity<org.springframework.core.io.Resource> getSoundData(@PathVariable Long soundId) {
+    public ResponseEntity<Resource> getSoundData(@PathVariable Long soundId) {
         try {
             // Récupérer les données du son
             byte[] soundData = soundService.getSoundData(soundId);
@@ -83,9 +81,6 @@ public class SoundController {
             return ResponseEntity.notFound().build(); // Son non trouvé
         }
     }
-
-
-
 
 
     @GetMapping("/user/me")

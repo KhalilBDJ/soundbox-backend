@@ -1,8 +1,6 @@
 package com.bedjaoui.backend.Model.User;
 
-import com.bedjaoui.backend.Model.User.Role;
 import com.bedjaoui.backend.Model.Sound;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,7 +25,7 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role; // Enum pour le rôle
+    private Role role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Sound> sounds;

@@ -10,7 +10,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,7 +26,6 @@ public class UserService {
         this.soundService = soundService;
     }
 
-    // Ajouter un nouvel utilisateur avec un mot de passe haché
     public User addUser(User user) {
         user.setEmail(user.getEmail());
         user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -35,7 +33,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    // Récupérer tous les utilisateurs
     @Transactional
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream()
@@ -43,18 +40,15 @@ public class UserService {
                 .collect(Collectors.toList());
     }
 
-    // Récupérer un utilisateur par email
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email);
     }
 
-    // Vérifier si un utilisateur existe par email
     public boolean checkIfUserExists(String email) {
         return userRepository.findByEmail(email)!=
                 null;
     }
 
-    // Vérifier si un utilisateur existe par ID
     public boolean checkIfUserExists(Long userId) {
         return userRepository.findById(userId).isPresent();
     }

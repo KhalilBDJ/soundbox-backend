@@ -12,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class SoundService {
@@ -26,23 +25,19 @@ public class SoundService {
         this.userRepository = userRepository;
     }
 
-    // Ajouter un son à partir d'un fichier MultipartFile
     @Transactional
-    public Sound addSoundToUser(Long userId, MultipartFile file, String name, int duration) {
-        // Vérifier si l'utilisateur existe
+    public void addSoundToUser(Long userId, MultipartFile file, String name, int duration) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
 
         try {
-            // Créer un objet Sound
             Sound sound = new Sound();
             sound.setUser(user);
-            sound.setData(file.getBytes()); // Convertir le fichier en tableau de bytes
+            sound.setData(file.getBytes());
             sound.setName(name);
             sound.setDuration(duration);
 
-            // Sauvegarder le son
-            return soundRepository.save(sound);
+            soundRepository.save(sound);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to process the file", e);
         }
@@ -51,16 +46,13 @@ public class SoundService {
 
     @Transactional
     public List<SoundDTO> getSoundsByUserId(Long userId) {
-        // Récupérer les entités Sound associées à l'utilisateur
         List<Sound> sounds = soundRepository.findByUserId(userId) .orElseThrow(() -> new RuntimeException("User not found for id: " + userId));
-        // Convertir chaque Sound en SoundDTO
         return sounds.stream().map(this::toSoundDTO).toList();
     }
 
-    // Récupérer un son par ID
     @Transactional
     public SoundDTO getSoundById(Long soundId) {
-        Sound sound = soundRepository.findById(soundId) .orElseThrow(() -> new RuntimeException("Sound not found for id: " + soundId));;
+        Sound sound = soundRepository.findById(soundId) .orElseThrow(() -> new RuntimeException("Sound not found for id: " + soundId));
         return toSoundDTO(sound);
     }
 
@@ -75,12 +67,10 @@ public class SoundService {
     }
 
 
-    // Vérifier si un son existe par ID
     public boolean checkIfSoundExists(Long soundId) {
         return soundRepository.findById(soundId).isPresent();
     }
 
-    // Supprimer un son par ID
     public void deleteSoundById(Long soundId) {
         soundRepository.deleteById(soundId);
     }

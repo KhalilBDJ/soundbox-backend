@@ -25,7 +25,7 @@ public class AuthController {
         this.userService = userService;
         this.passwordEncoder = passwordEncoder;
     }
-    // Endpoint pour l'inscription d'un utilisateur
+
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody RegisterRequestDTO registerRequest) {
         if (userService.checkIfUserExists(registerRequest.getEmail())) {

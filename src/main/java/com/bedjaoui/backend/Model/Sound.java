@@ -1,11 +1,10 @@
 package com.bedjaoui.backend.Model;
 
 import com.bedjaoui.backend.Model.User.User;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-//TODO : Mettre un DTO pour retirer l'utilisateur en retour d'appel de l'API
+
 @Entity
 @Getter
 @Setter
@@ -26,5 +25,5 @@ public class Sound {
     @Column(nullable = false)
     private String name;
 
-    private int duration; // Duration in seconds, for example
+    private int duration;
 }

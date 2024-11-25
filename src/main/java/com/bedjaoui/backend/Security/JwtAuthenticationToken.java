@@ -13,13 +13,6 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
     private final Long userId;
     private final String role;
 
-    public JwtAuthenticationToken(String username, Long userId, String role) {
-        super(null); // Les autorités ne sont pas encore définies ici
-        this.username = username;
-        this.userId = userId;
-        this.role = role;
-        setAuthenticated(false); // Marque comme non authentifié initialement
-    }
 
     public JwtAuthenticationToken(String username, Long userId, String role, Collection<? extends GrantedAuthority> authorities) {
         super(authorities); // Définit les autorités associées
