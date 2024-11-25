@@ -2,6 +2,7 @@ package com.bedjaoui.backend.Filter;
 
 import com.bedjaoui.backend.Security.JwtAuthenticationToken;
 import com.bedjaoui.backend.Util.JwtUtils;
+import lombok.NonNull;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -21,8 +22,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.jwtUtils = jwtUtils;
     }
     @Override
-    protected void doFilterInternal(jakarta.servlet.http.HttpServletRequest request,
-                                    jakarta.servlet.http.HttpServletResponse response,
+    protected void doFilterInternal(jakarta.servlet.http.HttpServletRequest request, @NonNull
+                                    jakarta.servlet.http.HttpServletResponse response, @NonNull
                                     jakarta.servlet.FilterChain filterChain)
             throws jakarta.servlet.ServletException, IOException {
 
