@@ -1,4 +1,4 @@
-package com.bedjaoui.backend.Security;
+package com.bedjaoui.backend.Security.config;
 
 import com.bedjaoui.backend.Filter.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
