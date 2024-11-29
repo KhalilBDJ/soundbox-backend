@@ -2,18 +2,20 @@ package com.bedjaoui.backend.Filter;
 
 import com.bedjaoui.backend.Security.JwtAuthenticationToken;
 import com.bedjaoui.backend.Util.JwtUtils;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
 @Component
+@Order(2)
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
@@ -59,7 +61,4 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Transmettre la requête au filtre suivant
         filterChain.doFilter(request, response);
     }
-
-
-
 }
