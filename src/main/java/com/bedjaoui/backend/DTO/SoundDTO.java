@@ -14,4 +14,11 @@ public class SoundDTO {
     private Long id;
     private String name;
     private int duration;
+    private byte[] data;
+
+    public SoundDTO(Long id, String name, int duration) {
+        this.id = id;
+        this.name = name;
+        this.duration = duration;
+    }
 }
