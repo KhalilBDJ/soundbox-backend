@@ -2,6 +2,7 @@ package com.bedjaoui.backend.Controller;
 
 
 import com.bedjaoui.backend.DTO.SoundDTO;
+import com.bedjaoui.backend.Model.Sound;
 import com.bedjaoui.backend.Service.SoundService;
 import com.bedjaoui.backend.Service.UserService;
 import com.bedjaoui.backend.Util.AuthUtils;
@@ -84,10 +85,10 @@ public class SoundController {
 
 
     @GetMapping("/user/me")
-    public ResponseEntity<List<SoundDTO>> getAuthenticatedUserSounds() {
+    public ResponseEntity<List<Sound>> getAuthenticatedUserSounds() {
         try {
             Long userId = authUtils.getAuthenticatedUserId();
-            List<SoundDTO> sounds = soundService.getSoundsByUserId(userId);
+            List<Sound> sounds = soundService.getSoundsByUserId(userId);
             return ResponseEntity.ok(sounds);
         } catch (IllegalStateException e) {
             return ResponseEntity.status(401).build();
