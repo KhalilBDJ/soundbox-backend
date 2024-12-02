@@ -33,10 +33,6 @@ public class SecurityConfig {
                         .anyRequest().hasRole("USER") // USER par défaut pour tout le reste
                 )
 
-                // Ajout des filtres dans le bon ordre
-                .addFilterBefore(corsFilter, JwtAuthenticationFilter.class) // Le filtre CORS avant le filtre JWT
-                .addFilterAfter(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // Filtre JWT
-
                 // Gestion des sessions stateless
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
