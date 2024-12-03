@@ -2,7 +2,6 @@ package com.bedjaoui.backend.Controller;
 
 
 import com.bedjaoui.backend.DTO.SoundDTO;
-import com.bedjaoui.backend.Model.Sound;
 import com.bedjaoui.backend.Service.SoundService;
 import com.bedjaoui.backend.Service.UserService;
 import com.bedjaoui.backend.Util.AuthUtils;
@@ -32,7 +31,7 @@ public class SoundController {
 
     // Ajouter un nouveau son pour un utilisateur
     @PostMapping("/user/")
-    public ResponseEntity<String> uploadSoundToUser(@RequestParam("file") MultipartFile file,
+    public ResponseEntity<String> uploadSoundToUser(@RequestParam("data") MultipartFile data,
                                                       @RequestParam("name") String name,
                                                       @RequestParam("duration") int duration) {
         try {
@@ -40,7 +39,7 @@ public class SoundController {
             if (!userService.checkIfUserExists(userId)) {
                 return ResponseEntity.notFound().build(); // Utilisateur non trouvé
             }
-            soundService.addSoundToUser(userId, file, name, duration);
+            soundService.addSoundToUser(userId, data, name, duration);
             return ResponseEntity.ok("Sound added successfully + " + name);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(null); // Utilisateur non trouvé
