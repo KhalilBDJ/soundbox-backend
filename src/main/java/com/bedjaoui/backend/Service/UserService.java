@@ -36,7 +36,7 @@ public class UserService {
     @Transactional
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(user -> new UserDTO(user.getId(), user.getEmail(), soundService.getSoundDTOsByUserId(user.getId())))
+                .map(user -> new UserDTO(user.getId(), user.getEmail(), soundService.getSoundsByUserId(user.getId())))
                 .collect(Collectors.toList());
     }
 

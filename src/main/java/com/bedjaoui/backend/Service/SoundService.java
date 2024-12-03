@@ -45,15 +45,9 @@ public class SoundService {
 
 
     @Transactional
-    public List<SoundDTO> getSoundDTOsByUserId(Long userId) {
+    public List<SoundDTO> getSoundsByUserId(Long userId) {
         List<Sound> sounds = soundRepository.findByUserId(userId) .orElseThrow(() -> new RuntimeException("User not found for id: " + userId));
         return sounds.stream().map(this::toSoundDTO).toList();
-    }
-
-    @Transactional
-    public List<Sound> getSoundsByUserId(Long userId) {
-        List<Sound> sounds = soundRepository.findByUserId(userId) .orElseThrow(() -> new RuntimeException("User not found for id: " + userId));
-        return sounds;
     }
 
     @Transactional

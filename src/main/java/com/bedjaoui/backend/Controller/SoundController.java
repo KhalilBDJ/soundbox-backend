@@ -85,10 +85,10 @@ public class SoundController {
 
 
     @GetMapping("/user/me")
-    public ResponseEntity<List<Sound>> getAuthenticatedUserSounds() {
+    public ResponseEntity<List<SoundDTO>> getAuthenticatedUserSounds() {
         try {
             Long userId = authUtils.getAuthenticatedUserId();
-            List<Sound> sounds = soundService.getSoundsByUserId(userId);
+            List<SoundDTO> sounds = soundService.getSoundsByUserId(userId);
             return ResponseEntity.ok(sounds);
         } catch (IllegalStateException e) {
             return ResponseEntity.status(401).build();
