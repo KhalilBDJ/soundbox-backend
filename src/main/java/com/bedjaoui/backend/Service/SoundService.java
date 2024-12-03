@@ -83,6 +83,8 @@ public class SoundService {
         dto.setId(sound.getId());
         dto.setName(sound.getName());
         dto.setDuration(sound.getDuration());
+        dto.setData(sound.getData()); // Inclure les données
         return dto;
     }
+
 }
