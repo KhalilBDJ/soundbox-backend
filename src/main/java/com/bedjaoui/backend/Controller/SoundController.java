@@ -35,22 +35,21 @@ public class SoundController {
         this.youTubeService = youTubeService;
     }
 
-    // Ajouter un nouveau son pour un utilisateur
     @PostMapping("/user/")
     public ResponseEntity<String> uploadSoundToUser(@RequestParam("data") MultipartFile data,
                                                       @RequestParam("name") String name,
                                                       @RequestParam("duration") int duration) {
         try {
             Long userId = authUtils.getAuthenticatedUserId();
-            if (!userService.checkIfUserExists(userId)) {
+            if (userService.checkIfUserExists(userId)) {
                 return ResponseEntity.notFound().build(); // Utilisateur non trouvé
             }
             soundService.addSoundToUser(userId, data, name, duration);
             return ResponseEntity.ok("Sound added successfully + " + name);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body(null); // Utilisateur non trouvé
+            return ResponseEntity.status(404).body(null);
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(500).body(null); // Erreur de traitement du fichier
+            return ResponseEntity.status(500).body(null);
         }
     }
 
@@ -102,7 +101,7 @@ public class SoundController {
     public ResponseEntity<String> uploadSoundFromYouTube(@RequestParam("url") String youtubeUrl) {
         try {
             Long userId = authUtils.getAuthenticatedUserId();
-            if (!userService.checkIfUserExists(userId)) {
+            if (userService.checkIfUserExists(userId)) {
                 return ResponseEntity.notFound().build();
             }
 

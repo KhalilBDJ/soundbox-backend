@@ -50,6 +50,6 @@ public class UserService {
     }
 
     public boolean checkIfUserExists(Long userId) {
-        return userRepository.findById(userId).isPresent();
+        return userRepository.findById(userId).isEmpty();
     }
 }

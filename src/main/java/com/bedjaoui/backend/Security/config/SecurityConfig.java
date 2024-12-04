@@ -23,21 +23,21 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter, CorsFilter corsFilter) throws Exception {
         http
-                // Désactiver CSRF
+
                 .csrf(AbstractHttpConfigurer::disable)
 
-                // Gérer les requêtes autorisées
+
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll() // Autoriser les endpoints publics
-                        .requestMatchers("/admin/**").hasRole("ADMIN") // ADMIN uniquement
-                        .anyRequest().hasRole("USER") // USER par défaut pour tout le reste
+                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        .anyRequest().hasRole("USER")
                 )
 
-                // Ajout des filtres dans le bon ordre
-                .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class) // Le filtre CORS avant le filtre JWT
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // Filtre JWT
 
-                // Gestion des sessions stateless
+                .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+
+
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
         return http.build();

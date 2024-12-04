@@ -24,12 +24,12 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken {
 
     @Override
     public Object getCredentials() {
-        return null; // Aucun mot de passe ou autre donnée sensible n'est nécessaire ici
+        return null;
     }
 
     @Override
     public Object getPrincipal() {
-        return username; // Le nom d'utilisateur est considéré comme le principal
+        return username;
     }
 
 }

@@ -17,7 +17,7 @@ public class YouTubeService {
     }
 
     public Map<String, Object> downloadFromYouTube(String youtubeUrl) {
-        String pythonServiceUrl = "http://localhost:5000/convert"; // URL du service Python
+        String pythonServiceUrl = "http://localhost:5000/convert";
         Map<String, String> request = new HashMap<>();
         request.put("url", youtubeUrl);
 
