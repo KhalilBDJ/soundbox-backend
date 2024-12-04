@@ -69,13 +69,12 @@ public class SoundController {
         soundService.deleteSoundById(soundId);
         return ResponseEntity.noContent().build();
     }
+
     @GetMapping("/{soundId}/data")
     public ResponseEntity<Resource> getSoundData(@PathVariable Long soundId) {
         try {
-            // Récupérer les données du son
             byte[] soundData = soundService.getSoundData(soundId);
 
-            // Créer une ressource pour le téléchargement
             ByteArrayResource resource = new ByteArrayResource(soundData);
 
             return ResponseEntity.ok()
@@ -88,7 +87,6 @@ public class SoundController {
         }
     }
 
-
     @GetMapping("/user/me")
     public ResponseEntity<List<SoundDTO>> getAuthenticatedUserSounds() {
         try {
@@ -100,23 +98,19 @@ public class SoundController {
         }
     }
 
-
     @PostMapping("/user/youtube")
     public ResponseEntity<String> uploadSoundFromYouTube(@RequestParam("url") String youtubeUrl) {
         try {
             Long userId = authUtils.getAuthenticatedUserId();
             if (!userService.checkIfUserExists(userId)) {
-                return ResponseEntity.notFound().build(); // Utilisateur non trouvé
+                return ResponseEntity.notFound().build();
             }
 
-            // Appeler le service Python pour télécharger les données
             Map<String, Object> soundData = youTubeService.downloadFromYouTube(youtubeUrl);
 
-            // Décoder les données Base64
             String base64Audio = (String) soundData.get("audioBase64");
             byte[] audioData = Base64.getDecoder().decode(base64Audio);
 
-            // Enregistrer les données dans la base
             String name = (String) soundData.get("name");
             int duration = (int) soundData.get("duration");
             soundService.addSoundToUser(userId, audioData, name, duration);
