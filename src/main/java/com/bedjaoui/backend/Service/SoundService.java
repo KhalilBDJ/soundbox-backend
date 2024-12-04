@@ -14,7 +14,6 @@ import java.io.IOException;
 import java.util.List;
 
 
-//TODO: check pourquoi la data est null
 @Service
 public class SoundService {
 
@@ -43,6 +42,20 @@ public class SoundService {
         } catch (IOException e) {
             throw new IllegalStateException("Failed to process the file", e);
         }
+    }
+
+    @Transactional
+    public void addSoundToUser(Long userId, byte[] file, String name, int duration) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+
+        Sound sound = new Sound();
+        sound.setUser(user);
+        sound.setData(file);
+        sound.setName(name);
+        sound.setDuration(duration);
+
+        soundRepository.save(sound);
     }
 
 
