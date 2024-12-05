@@ -15,6 +15,7 @@ import org.springframework.core.io.Resource;
 
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Base64;
 
 
@@ -98,7 +99,7 @@ public class SoundController {
     }
 
     @PostMapping("/user/youtube")
-    public ResponseEntity<String> uploadSoundFromYouTube(@RequestParam("url") String youtubeUrl) {
+    public ResponseEntity<Map<String, String>> uploadSoundFromYouTube(@RequestParam("url") String youtubeUrl) {
         try {
             Long userId = authUtils.getAuthenticatedUserId();
             if (userService.checkIfUserExists(userId)) {
@@ -114,11 +115,19 @@ public class SoundController {
             int duration = (int) soundData.get("duration");
             soundService.addSoundToUser(userId, audioData, name, duration);
 
-            return ResponseEntity.ok("Sound added successfully: " + name);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Sound added successfully");
+            response.put("name", name);
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body("User not found.");
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "User not found.");
+            return ResponseEntity.status(404).body(errorResponse);
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(500).body("Error processing YouTube sound.");
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error processing YouTube sound.");
+            return ResponseEntity.status(500).body(errorResponse);
         }
     }
+
 }
