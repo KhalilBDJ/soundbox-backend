@@ -26,4 +26,5 @@ public class Sound {
     private String name;
 
     private int duration;
+
 }

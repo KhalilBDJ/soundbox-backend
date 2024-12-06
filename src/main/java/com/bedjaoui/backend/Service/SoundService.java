@@ -81,6 +81,18 @@ public class SoundService {
         return sound.getData();
     }
 
+    public void updateSoundName(Long soundId, String newName) {
+        // Vérifie si le son existe
+        if (!checkIfSoundExists(soundId)) {
+            throw new RuntimeException("Sound not found");
+        }
+
+        // Met à jour le nom du son dans la base de données
+        Sound sound = soundRepository.findById(soundId)
+                .orElseThrow(() -> new RuntimeException("Sound not found"));
+        sound.setName(newName);
+        soundRepository.save(sound); // Sauvegarde la mise à jour
+    }
 
     public boolean checkIfSoundExists(Long soundId) {
         return soundRepository.findById(soundId).isPresent();
@@ -98,5 +110,13 @@ public class SoundService {
         dto.setData(sound.getData()); // Inclure les données
         return dto;
     }
+
+    public boolean isUserOwnerOfSound(Long userId, Long soundId) {
+        // Vérifier si le son existe et appartient à l'utilisateur
+        return soundRepository.findById(soundId)
+                .map(sound -> sound.getUser().getId().equals(userId))
+                .orElse(false);
+    }
+
 
 }

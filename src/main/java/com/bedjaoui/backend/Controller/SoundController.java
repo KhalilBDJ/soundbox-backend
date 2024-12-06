@@ -130,4 +130,39 @@ public class SoundController {
         }
     }
 
+    @PutMapping("/user/{soundId}")
+    public ResponseEntity<Map<String, String>> updateSoundName(@PathVariable Long soundId, @RequestBody Map<String, String> updates) {
+        try {
+            // Vérifier si le son existe
+            if (!soundService.checkIfSoundExists(soundId)) {
+                return ResponseEntity.notFound().build();
+            }
+
+            // Obtenir l'utilisateur authentifié
+            Long userId = authUtils.getAuthenticatedUserId();
+
+            // Vérifier si l'utilisateur possède le son
+            if (!soundService.isUserOwnerOfSound(userId, soundId)) {
+                return ResponseEntity.status(403).body(Map.of("error", "You do not have permission to update this sound."));
+            }
+
+            // Récupérer le nouveau nom depuis la requête
+            String newName = updates.get("name");
+            if (newName == null || newName.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "Invalid name."));
+            }
+
+            // Mise à jour du nom du son
+            soundService.updateSoundName(soundId, newName);
+
+            // Retourner une réponse de succès
+            return ResponseEntity.ok(Map.of("message", "Sound name updated successfully.", "name", newName));
+        } catch (RuntimeException e) {
+            // Gestion des erreurs internes
+            return ResponseEntity.status(500).body(Map.of("error", "An error occurred while updating the sound name."));
+        }
+    }
+
+
+
 }
