@@ -8,6 +8,7 @@ import com.bedjaoui.backend.Service.YouTubeService;
 import com.bedjaoui.backend.Util.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -37,22 +38,26 @@ public class SoundController {
     }
 
     @PostMapping("/user/")
-    public ResponseEntity<String> uploadSoundToUser(@RequestParam("data") MultipartFile data,
-                                                      @RequestParam("name") String name,
-                                                      @RequestParam("duration") int duration) {
+    public ResponseEntity<Map<String, String>> uploadSoundToUser(@RequestParam("data") MultipartFile data,
+                                                                 @RequestParam("name") String name,
+                                                                 @RequestParam("duration") int duration) {
         try {
             Long userId = authUtils.getAuthenticatedUserId();
             if (userService.checkIfUserExists(userId)) {
-                return ResponseEntity.notFound().build(); // Utilisateur non trouvé
+                return ResponseEntity.notFound().build();
             }
             soundService.addSoundToUser(userId, data, name, duration);
-            return ResponseEntity.ok("Sound added successfully + " + name);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Sound added successfully");
+            response.put("name", name);
+            return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(404).body(null);
+            return ResponseEntity.status(404).body(Map.of("error", "User not found"));
         } catch (IllegalStateException e) {
-            return ResponseEntity.status(500).body(null);
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error"));
         }
     }
+
 
     // Récupérer un son par ID
     @GetMapping("/{soundId}")
@@ -99,7 +104,8 @@ public class SoundController {
     }
 
     @PostMapping("/user/youtube")
-    public ResponseEntity<Map<String, String>> uploadSoundFromYouTube(@RequestParam("url") String youtubeUrl) {
+    public ResponseEntity<Map<String, String>> uploadSoundFromYouTube(@RequestParam("url") String youtubeUrl,
+                                                                      @RequestParam(value = "name", required = false) String name) {
         try {
             Long userId = authUtils.getAuthenticatedUserId();
             if (userService.checkIfUserExists(userId)) {
@@ -111,24 +117,23 @@ public class SoundController {
             String base64Audio = (String) soundData.get("audioBase64");
             byte[] audioData = Base64.getDecoder().decode(base64Audio);
 
-            String name = (String) soundData.get("name");
+            // Utiliser le nom fourni ou celui de la vidéo
+            String finalName = (name != null && !name.trim().isEmpty()) ? name : (String) soundData.get("name");
             int duration = (int) soundData.get("duration");
-            soundService.addSoundToUser(userId, audioData, name, duration);
+
+            soundService.addSoundToUser(userId, audioData, finalName, duration);
 
             Map<String, String> response = new HashMap<>();
             response.put("message", "Sound added successfully");
-            response.put("name", name);
+            response.put("name", finalName);
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "User not found.");
-            return ResponseEntity.status(404).body(errorResponse);
+            return ResponseEntity.status(404).body(Map.of("error", "User not found."));
         } catch (IllegalStateException e) {
-            Map<String, String> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Error processing YouTube sound.");
-            return ResponseEntity.status(500).body(errorResponse);
+            return ResponseEntity.status(500).body(Map.of("error", "Error processing YouTube sound."));
         }
     }
+
 
     @PutMapping("/user/{soundId}")
     public ResponseEntity<Map<String, String>> updateSoundName(@PathVariable Long soundId, @RequestBody Map<String, String> updates) {
@@ -162,6 +167,30 @@ public class SoundController {
             return ResponseEntity.status(500).body(Map.of("error", "An error occurred while updating the sound name."));
         }
     }
+
+    // Dans SoundController
+    @PostMapping("/user/youtube/preview")
+    public ResponseEntity<byte[]> getPreviewFromYouTube(@RequestParam("url") String youtubeUrl) {
+        try {
+            Map<String, Object> soundData = youTubeService.downloadFromYouTube(youtubeUrl);
+
+            String base64Audio = (String) soundData.get("audioBase64");
+            byte[] audioData = java.util.Base64.getDecoder().decode(base64Audio);
+
+            String name = (String) soundData.get("name");
+            int duration = (int) soundData.get("duration");
+
+            return ResponseEntity.ok()
+                    .header("x-audio-name", name)
+                    .header("x-audio-duration", String.valueOf(duration))
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .body(audioData);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
 
 
 
