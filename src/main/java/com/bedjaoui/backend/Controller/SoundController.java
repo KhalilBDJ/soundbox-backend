@@ -8,9 +8,11 @@ import com.bedjaoui.backend.Service.YouTubeService;
 import com.bedjaoui.backend.Util.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.Resource;
 
@@ -191,7 +193,33 @@ public class SoundController {
         }
     }
 
+    @PostMapping("/trim")
+    public ResponseEntity<Map<String, Object>> trimAudio(@RequestBody Map<String, Object> requestData) {
+        try {
+            // Récupérer les données de la requête
+            String audioBase64 = (String) requestData.get("audioBase64");
+            double start = ((Number) requestData.get("start")).doubleValue();
+            double end = ((Number) requestData.get("end")).doubleValue();
 
+            // Préparer la requête pour le script Python
+            RestTemplate restTemplate = new RestTemplate();
+            String pythonUrl = "http://localhost:5000/trim"; // URL du script Python
+            Map<String, Object> pythonRequest = Map.of(
+                    "audio_base64", audioBase64,
+                    "start", start,
+                    "end", end
+            );
+
+            // Appeler le script Python
+            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(pythonRequest);
+            Map<String, Object> pythonResponse = restTemplate.postForObject(pythonUrl, entity, Map.class);
+
+            // Retourner la réponse au frontend
+            return ResponseEntity.ok(pythonResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Error communicating with Python script: " + e.getMessage()));
+        }
+    }
 
 
 }
