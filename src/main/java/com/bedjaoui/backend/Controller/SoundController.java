@@ -60,6 +60,34 @@ public class SoundController {
         }
     }
 
+    @PostMapping("/user/bytes")
+    public ResponseEntity<Map<String, String>> uploadSoundToUser(
+            @RequestBody Map<String, Object> requestData) {
+        try {
+            // Extraction des données de la requête
+            String base64Audio = (String) requestData.get("data");
+            String name = (String) requestData.get("name");
+            int duration = ((Number) requestData.get("duration")).intValue();
+
+            // Décoder la chaîne Base64 en tableau d'octets
+            byte[] audioBytes = java.util.Base64.getDecoder().decode(base64Audio);
+
+            // Obtenir l'utilisateur authentifié
+            Long userId = authUtils.getAuthenticatedUserId();
+
+            // Ajouter le son à l'utilisateur
+            soundService.addSoundToUser(userId, audioBytes, name, duration);
+
+            // Retourner une réponse de succès
+            return ResponseEntity.ok(Map.of("message", "Sound added successfully", "name", name));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(404).body(Map.of("error", "User not found."));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", "Error processing the sound: " + e.getMessage()));
+        }
+    }
+
+
 
     // Récupérer un son par ID
     @GetMapping("/{soundId}")
@@ -172,7 +200,7 @@ public class SoundController {
 
     // Dans SoundController
     @PostMapping("/user/youtube/preview")
-    public ResponseEntity<byte[]> getPreviewFromYouTube(@RequestParam("url") String youtubeUrl) {
+    public ResponseEntity<Map<String, Object>> getPreviewFromYouTube(@RequestParam("url") String youtubeUrl) {
         try {
             Map<String, Object> soundData = youTubeService.downloadFromYouTube(youtubeUrl);
 
@@ -182,16 +210,19 @@ public class SoundController {
             String name = (String) soundData.get("name");
             int duration = (int) soundData.get("duration");
 
-            return ResponseEntity.ok()
-                    .header("x-audio-name", name)
-                    .header("x-audio-duration", String.valueOf(duration))
-                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
-                    .body(audioData);
+            // Préparer l'objet JSON pour la réponse
+            Map<String, Object> responseBody = new HashMap<>();
+            responseBody.put("name", name);
+            responseBody.put("duration", duration);
+            responseBody.put("audioData", base64Audio); // On renvoie l'audio encodé en Base64
+
+            return ResponseEntity.ok(responseBody);
 
         } catch (Exception e) {
-            return ResponseEntity.status(500).build();
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
     }
+
 
     @PostMapping("/trim")
     public ResponseEntity<Map<String, Object>> trimAudio(@RequestBody Map<String, Object> requestData) {
