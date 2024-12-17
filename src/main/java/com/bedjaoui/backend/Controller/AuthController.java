@@ -42,7 +42,7 @@ public class AuthController {
 
         if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             String jwtToken = jwtUtils.generateToken(user.getEmail(), user.getId(), user.getRole().name(), user.getFirstName(), user.getLastName(), user.getPhoneNumber(), user.getPhoneNumber());
-            return ResponseEntity.ok(new LoginResponseDTO(user.getId(), user.getEmail(), jwtToken));
+            return ResponseEntity.ok(new LoginResponseDTO(user.getId(), user.getUsername(), jwtToken));
         }
 
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
