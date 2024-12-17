@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 
 @RestController
 @RequestMapping("/auth")
@@ -27,14 +29,26 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody RegisterRequestDTO registerRequest) {
+    public ResponseEntity<?> register(@RequestBody RegisterRequestDTO registerRequest) {
         if (userService.checkIfUserExists(registerRequest.getEmail())) {
-            return ResponseEntity.badRequest().body("Email déjà utilisé.");
+            return ResponseEntity.badRequest().body(Map.of("message", "Email déjà utilisé."));
         }
-        User newUser = userService.addUser(new User(registerRequest.getEmail(), registerRequest.getPassword(), registerRequest.getUsername(), registerRequest.getFirstName(),
-                registerRequest.getLastName(), registerRequest.getPhoneNumber()));
-        return ResponseEntity.ok("Utilisateur inscrit avec succès avec l'ID: " + newUser.getId());
+
+        User newUser = userService.addUser(new User(
+                registerRequest.getEmail(),
+                registerRequest.getPassword(),
+                registerRequest.getUsername(),
+                registerRequest.getFirstName(),
+                registerRequest.getLastName(),
+                registerRequest.getPhoneNumber()
+        ));
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Utilisateur inscrit avec succès.",
+                "userId", newUser.getId()
+        ));
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(@RequestBody LoginRequestDTO loginRequest) {
