@@ -11,12 +11,16 @@ import java.util.Date;
 public class JwtUtils {
     private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-    public String generateToken(String username, Long userId, String role) {
+    public String generateToken(String email, Long userId, String role, String firstName, String lastName, String phoneNumber, String username) {
         long jwtExpirationMs = 86400000;
         return Jwts.builder()
                 .setSubject(username)
                 .claim("userId", userId)
                 .claim("role", role)
+                .claim("firstName", firstName)
+                .claim("lastName", lastName)
+                .claim("phoneNumber", phoneNumber)
+                .claim("username", username)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + jwtExpirationMs))
                 .signWith(key)

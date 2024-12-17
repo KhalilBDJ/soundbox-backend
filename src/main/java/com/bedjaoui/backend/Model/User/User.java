@@ -23,6 +23,18 @@ public class User {
     @Column(nullable = false)
     private String password;
 
+    @Column(nullable = false)
+    private String username;
+
+    @Column(nullable = false)
+    private String firstName;
+
+    @Column(nullable = false)
+    private String lastName;
+
+    @Column(nullable = false)
+    private String phoneNumber;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
@@ -31,8 +43,18 @@ public class User {
     private List<Sound> sounds;
 
     public User(String email, String password) {
+
         this.email = email;
         this.password = password;
+    }
+
+    public User(String email, String password, String username, String firstName, String lastName, String phoneNumber) {
+        this.email = email;
+        this.password = password;
+        this.username = username;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.phoneNumber = phoneNumber;
     }
 
     public User() {

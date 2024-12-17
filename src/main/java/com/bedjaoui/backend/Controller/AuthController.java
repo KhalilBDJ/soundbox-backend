@@ -31,7 +31,8 @@ public class AuthController {
         if (userService.checkIfUserExists(registerRequest.getEmail())) {
             return ResponseEntity.badRequest().body("Email déjà utilisé.");
         }
-        User newUser = userService.addUser(new User(registerRequest.getEmail(), registerRequest.getPassword()));
+        User newUser = userService.addUser(new User(registerRequest.getEmail(), registerRequest.getPassword(), registerRequest.getUsername(), registerRequest.getFirstName(),
+                registerRequest.getLastName(), registerRequest.getPhoneNumber()));
         return ResponseEntity.ok("Utilisateur inscrit avec succès avec l'ID: " + newUser.getId());
     }
 
@@ -40,7 +41,7 @@ public class AuthController {
         User user = userService.getUserByEmail(loginRequest.getEmail());
 
         if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            String jwtToken = jwtUtils.generateToken(user.getEmail(), user.getId(), user.getRole().name());
+            String jwtToken = jwtUtils.generateToken(user.getEmail(), user.getId(), user.getRole().name(), user.getFirstName(), user.getLastName(), user.getPhoneNumber(), user.getPhoneNumber());
             return ResponseEntity.ok(new LoginResponseDTO(user.getId(), user.getEmail(), jwtToken));
         }
 
