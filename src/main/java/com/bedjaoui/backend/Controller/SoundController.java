@@ -1,15 +1,12 @@
 package com.bedjaoui.backend.Controller;
 
-
 import com.bedjaoui.backend.DTO.SoundDTO;
 import com.bedjaoui.backend.Service.SoundService;
 import com.bedjaoui.backend.Service.UserService;
-import com.bedjaoui.backend.Service.YouTubeService;
 import com.bedjaoui.backend.Util.AuthUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -29,14 +26,12 @@ public class SoundController {
     private final SoundService soundService;
     private final UserService userService;
     private final AuthUtils authUtils;
-    private final YouTubeService youTubeService;
 
     @Autowired
-    public SoundController(SoundService soundService, UserService userService, AuthUtils authUtils, YouTubeService youTubeService) {
+    public SoundController(SoundService soundService, UserService userService, AuthUtils authUtils) {
         this.soundService = soundService;
         this.userService = userService;
         this.authUtils = authUtils;
-        this.youTubeService = youTubeService;
     }
 
     @PostMapping("/user/")
@@ -64,21 +59,16 @@ public class SoundController {
     public ResponseEntity<Map<String, String>> uploadSoundToUser(
             @RequestBody Map<String, Object> requestData) {
         try {
-            // Extraction des données de la requête
             String base64Audio = (String) requestData.get("data");
             String name = (String) requestData.get("name");
             int duration = ((Number) requestData.get("duration")).intValue();
 
-            // Décoder la chaîne Base64 en tableau d'octets
             byte[] audioBytes = java.util.Base64.getDecoder().decode(base64Audio);
 
-            // Obtenir l'utilisateur authentifié
             Long userId = authUtils.getAuthenticatedUserId();
 
-            // Ajouter le son à l'utilisateur
             soundService.addSoundToUser(userId, audioBytes, name, duration);
 
-            // Retourner une réponse de succès
             return ResponseEntity.ok(Map.of("message", "Sound added successfully", "name", name));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(Map.of("error", "User not found."));
@@ -87,9 +77,6 @@ public class SoundController {
         }
     }
 
-
-
-    // Récupérer un son par ID
     @GetMapping("/{soundId}")
     public ResponseEntity<SoundDTO> getSoundById(@PathVariable Long soundId) {
         SoundDTO soundDTO = soundService.getSoundById(soundId);
@@ -118,7 +105,7 @@ public class SoundController {
                     .contentType(org.springframework.http.MediaType.APPLICATION_OCTET_STREAM)
                     .body(resource);
         } catch (RuntimeException e) {
-            return ResponseEntity.notFound().build(); // Son non trouvé
+            return ResponseEntity.notFound().build();
         }
     }
 
@@ -142,21 +129,10 @@ public class SoundController {
                 return ResponseEntity.notFound().build();
             }
 
-            Map<String, Object> soundData = youTubeService.downloadFromYouTube(youtubeUrl);
-
-            String base64Audio = (String) soundData.get("audioBase64");
-            byte[] audioData = Base64.getDecoder().decode(base64Audio);
-
-            // Utiliser le nom fourni ou celui de la vidéo
-            String finalName = (name != null && !name.trim().isEmpty()) ? name : (String) soundData.get("name");
-            int duration = (int) soundData.get("duration");
-
-            soundService.addSoundToUser(userId, audioData, finalName, duration);
-
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Sound added successfully");
-            response.put("name", finalName);
-            return ResponseEntity.ok(response);
+            // Appel au service Python pour récupérer l'audio depuis YouTube
+            RestTemplate restTemplate = new RestTemplate();
+            String pythonUrl = "http://localhost:5000/convert"; // Endpoint Python pour YouTube
+            return getMapResponseEntity(youtubeUrl, name, userId, restTemplate, pythonUrl);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(404).body(Map.of("error", "User not found."));
         } catch (IllegalStateException e) {
@@ -164,93 +140,125 @@ public class SoundController {
         }
     }
 
-
     @PutMapping("/user/{soundId}")
     public ResponseEntity<Map<String, String>> updateSoundName(@PathVariable Long soundId, @RequestBody Map<String, String> updates) {
         try {
-            // Vérifier si le son existe
             if (!soundService.checkIfSoundExists(soundId)) {
                 return ResponseEntity.notFound().build();
             }
 
-            // Obtenir l'utilisateur authentifié
             Long userId = authUtils.getAuthenticatedUserId();
 
-            // Vérifier si l'utilisateur possède le son
             if (!soundService.isUserOwnerOfSound(userId, soundId)) {
                 return ResponseEntity.status(403).body(Map.of("error", "You do not have permission to update this sound."));
             }
 
-            // Récupérer le nouveau nom depuis la requête
             String newName = updates.get("name");
             if (newName == null || newName.trim().isEmpty()) {
                 return ResponseEntity.badRequest().body(Map.of("error", "Invalid name."));
             }
 
-            // Mise à jour du nom du son
             soundService.updateSoundName(soundId, newName);
 
-            // Retourner une réponse de succès
             return ResponseEntity.ok(Map.of("message", "Sound name updated successfully.", "name", newName));
         } catch (RuntimeException e) {
-            // Gestion des erreurs internes
             return ResponseEntity.status(500).body(Map.of("error", "An error occurred while updating the sound name."));
         }
     }
 
-    // Dans SoundController
     @PostMapping("/user/youtube/preview")
     public ResponseEntity<Map<String, Object>> getPreviewFromYouTube(@RequestParam("url") String youtubeUrl) {
         try {
-            Map<String, Object> soundData = youTubeService.downloadFromYouTube(youtubeUrl);
-
-            String base64Audio = (String) soundData.get("audioBase64");
-            byte[] audioData = java.util.Base64.getDecoder().decode(base64Audio);
-
-            String name = (String) soundData.get("name");
-            int duration = (int) soundData.get("duration");
-
-            // Préparer l'objet JSON pour la réponse
-            Map<String, Object> responseBody = new HashMap<>();
-            responseBody.put("name", name);
-            responseBody.put("duration", duration);
-            responseBody.put("audioData", base64Audio); // On renvoie l'audio encodé en Base64
-
-            return ResponseEntity.ok(responseBody);
-
+            RestTemplate restTemplate = new RestTemplate();
+            String pythonUrl = "http://localhost:5000/convert"; // On réutilise l'endpoint /convert
+            return getMapResponseEntity(youtubeUrl, restTemplate, pythonUrl);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
         }
     }
 
-
     @PostMapping("/trim")
     public ResponseEntity<Map<String, Object>> trimAudio(@RequestBody Map<String, Object> requestData) {
         try {
-            // Récupérer les données de la requête
             String audioBase64 = (String) requestData.get("audioBase64");
             double start = ((Number) requestData.get("start")).doubleValue();
             double end = ((Number) requestData.get("end")).doubleValue();
 
-            // Préparer la requête pour le script Python
             RestTemplate restTemplate = new RestTemplate();
-            String pythonUrl = "http://localhost:5000/trim"; // URL du script Python
+            String pythonUrl = "http://localhost:5000/trim";
             Map<String, Object> pythonRequest = Map.of(
                     "audio_base64", audioBase64,
                     "start", start,
                     "end", end
             );
 
-            // Appeler le script Python
-            HttpEntity<Map<String, Object>> entity = new HttpEntity<>(pythonRequest);
-            Map<String, Object> pythonResponse = restTemplate.postForObject(pythonUrl, entity, Map.class);
+            Map<String, Object> pythonResponse = restTemplate.postForObject(pythonUrl, pythonRequest, Map.class);
 
-            // Retourner la réponse au frontend
             return ResponseEntity.ok(pythonResponse);
         } catch (Exception e) {
             return ResponseEntity.status(500).body(Map.of("error", "Error communicating with Python script: " + e.getMessage()));
         }
     }
 
+
+    private ResponseEntity<Map<String, String>> getMapResponseEntity(@RequestParam("url") String tiktokUrl, @RequestParam(value = "name", required = false) String name, Long userId, RestTemplate restTemplate, String pythonUrl) {
+        Map<String, String> pythonRequest = Map.of("url", tiktokUrl);
+
+        Map<String, Object> soundData = restTemplate.postForObject(pythonUrl, pythonRequest, Map.class);
+
+        String base64Audio = (String) soundData.get("audio_base64");
+        byte[] audioData = Base64.getDecoder().decode(base64Audio);
+
+        String finalName = (name != null && !name.trim().isEmpty()) ? name : (String) soundData.get("name");
+        int duration = (int) soundData.get("duration");
+
+        soundService.addSoundToUser(userId, audioData, finalName, duration);
+
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Sound added successfully");
+        response.put("name", finalName);
+        return ResponseEntity.ok(response);
+    }
+
+
+    @PostMapping("/user/instagram/preview")
+    public ResponseEntity<Map<String, Object>> getPreviewFromInstagram(@RequestParam("url") String instagramUrl) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            String pythonUrl = "http://localhost:5000/convert/instagram";
+
+            return getMapResponseEntity(instagramUrl, restTemplate, pythonUrl);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/user/tiktok/preview")
+    public ResponseEntity<Map<String, Object>> getPreviewFromTikTok(@RequestParam("url") String tiktokUrl) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            String pythonUrl = "http://localhost:5000/convert/tiktok";
+
+            return getMapResponseEntity(tiktokUrl, restTemplate, pythonUrl);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    private ResponseEntity<Map<String, Object>> getMapResponseEntity(@RequestParam("url") String tiktokUrl, RestTemplate restTemplate, String pythonUrl) {
+        Map<String, String> pythonRequest = Map.of("url", tiktokUrl);
+        Map<String, Object> soundData = restTemplate.postForObject(pythonUrl, pythonRequest, Map.class);
+
+        String base64Audio = (String) soundData.get("audio_base64");
+        String name = (String) soundData.get("name");
+        int duration = (int) soundData.get("duration");
+
+        Map<String, Object> responseBody = new HashMap<>();
+        responseBody.put("name", name);
+        responseBody.put("duration", duration);
+        responseBody.put("audioData", base64Audio);
+
+        return ResponseEntity.ok(responseBody);
+    }
 
 }
