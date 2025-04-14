@@ -1,4 +1,4 @@
-# 🧠 Soundbox Backend
+# Soundbox Backend
 
 Bienvenue dans le **backend** du projet **Soundbox**, une plateforme interactive permettant aux utilisateurs de créer, organiser et personnaliser leurs propres **boîtes à sons**.
 
